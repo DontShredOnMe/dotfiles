@@ -1,0 +1,10 @@
+cd .config/
+rename .bashrc
+rename bar
+rename vol
+rename wal-set
+mkdir i3
+rename .Xresources
+cd .cache/
+
+delete
