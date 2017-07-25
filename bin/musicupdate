@@ -1,0 +1,19 @@
+#!/bin/bash
+for (( ; ; ))
+do
+
+    old="`mpc | head -n 1`"
+    sleep 2
+    new="`mpc | head -n 1`"
+
+    if [ "`echo ${new} | grep volume | grep repeat | grep random`" != "" ] ; then
+        if [ "$old" != "$new" ] ; then
+			notify-no-icon "MPD Playback stopped"
+        fi
+        old="$new"
+    fi
+    if [ "$old" != "$new" ] ; then
+      # coverfixer
+      notify-no-icon "$(mpc current -f "%artist%")" "$(mpc current -f "%title%")"
+    fi
+done

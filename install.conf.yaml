@@ -1,0 +1,28 @@
+- defaults:
+    link:
+        relink: true
+
+- clean: ['~']
+
+- link:
+    ~/projects/dotfiles: ''
+    ~/.atom: atom
+    ~/.config/Atom: .config/Atom
+    ~/.config/i3: .config/i3
+    ~/.config/nvim: .config/nvim
+    ~/.config/mimeapps.list: .config/mimeapps.list
+    ~/.fonts: .fonts
+    ~/.fzf: .fzf
+    ~/.mozilla: .mozilla
+    ~/.zsh: .zsh
+    ~/.dir_colors: .dir_colors
+    ~/.fonts.conf: .fonts.conf
+    ~/.fzf.zsh: .fzf.zsh
+    ~/.xinitrc: .xinitrc
+    ~/.Xresources: .Xresources
+    ~/.zshrc: .zshrc
+    ~/Pictures: Pictures
+    ~/bin: bin
+
+- shell:
+    - [git submodule update --init ---recursive, Installing submodules]

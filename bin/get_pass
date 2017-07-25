@@ -1,0 +1,7 @@
+#!/bin/bash
+
+win_name=""
+# If there is an argument, don't serach by window name
+[[ -z $1 ]] && echo "Enter window name"
+[[ -z $1 ]] && win_name=$(xdotool getwindowname $(xdotool getwindowfocus) | awk -F ' ' '{print tolower($1)}')
+search_pass "$win_name"

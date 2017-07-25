@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# strelokcat - (c) wtfpl 2014
+# download the audio track of the first result of a youtube search
+# and add it to MPD library (will end up with a .mp3, for tags)
+# Require :  ys (youtube search)
+
+
+usage() {
+    echo "`basename $0` [-h] <query>"
+}
+
+# don't process if no argument given
+test $# -eq 0 && usage && exit 1
+
+# you can either pass MULTIPLE search terms or a SINGLE url
+uri=$(ys -n1 -u $@) || uri=$1
+text=$(ys -n1 -t $@)
+
+# give up if we got no uri
+if test -z "$uri"; then
+    echo "no result found"
+    exit 1
+fi
+
+#echo 'Description:'
+# cat <<EOF
+# `youtube-dl --skip-download --get-description "$uri"`
+# EOF
+
+echo -en "\n\n--- Playing: < $text > ---"
+mpv --geometry=640x360  $uri
+
+exit 0

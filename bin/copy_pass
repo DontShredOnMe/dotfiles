@@ -1,0 +1,9 @@
+#!/bin/bash
+
+touch /tmp/pass_clipped_fifo
+(inotifywait -e close_write /tmp/pass_clipped_fifo > /dev/null 2>&1
+pass=$(cat /tmp/pass_clipped_fifo | gpg -d -r rauros@mailoo.org --no-tty 2>/dev/null | head -n1)
+echo $pass | xsel -i
+notify-no-icon "Copied $(cat /tmp/pass_picked) to clipboard"
+) &
+get_pass

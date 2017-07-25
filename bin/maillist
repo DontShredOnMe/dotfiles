@@ -1,0 +1,25 @@
+#!/bin/sh
+
+fdm fetch
+
+INBOX=/home/gaunt/var/mail/inbox
+MBASE=/home/gaunt/var/mail
+LISTS='rauros'
+
+crawl() {
+    case $1 in
+        rauros)
+            REGEX='(to)*rauros@mailoo.org'
+            ;;
+    esac
+    
+    find $INBOX -type f -exec grep -liP "$REGEX" {} +
+}
+
+for ML in $LISTS; do
+    crawl "$ML" | while read FILE; do
+        echo "$ML - $(sed 's/^Subject: //p;d' $FILE)"
+        NEW=$(echo "$(basename $FILE)" | sed 's/\(:[12],[DFPR]*\)S\([T]*\)/\1\2/')
+        mv $FILE $MBASE/lists/$ML/new/$NEW
+    done
+done

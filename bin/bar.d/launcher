@@ -1,0 +1,16 @@
+#!/usr/bin/env fish
+
+set res (xrandr | grep '*' | cut -dx -f1)
+set pw 500
+set px (math $res/2-$pw/2)
+set ph 35
+set py 25
+
+killall admiral
+killall lemonbar
+
+set name (basename $wp | cut -d. -f1)
+set extension (basename $wp | cut -d. -f2)
+
+
+admiral -c $HOME/bin/bar.d/admiral.toml | lemonbar -p -b -f "FontAwesome:size=11" -f "Dina:size=11" -g $pw"x$ph+$px+$py" -B '#eeeeee' -F '#5f5f5f' | sh

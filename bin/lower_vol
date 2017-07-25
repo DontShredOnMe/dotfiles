@@ -1,0 +1,6 @@
+#!/bin/bash
+amixer set Master 5%-
+
+icon="\uf028"
+
+notify-no-icon "$icon $(query_vol)"

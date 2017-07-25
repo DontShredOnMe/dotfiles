@@ -1,0 +1,16 @@
+#!/bin/bash
+
+outstr=""
+volout=$(query_vol | uniq)
+
+if [[ "${volout}" != "MUTE" ]]; then
+  outstr="${outstr}   "
+else
+  outstr="${outstr}  "
+  volout="-"
+fi
+
+outstr=${outstr}${volout}
+
+
+echo "%{A:fish $HOME/bin/bar.d/popups/msc/launcher &:}${outstr}%{A}"

@@ -1,0 +1,107 @@
+#!/bin/sh
+#
+
+MPD_DOWNLOAD_DIR=~/usr/msc/youtube/
+# CHANGE THIS FOR YOU ^^
+
+# TODO: Add tagging support for some reason 
+usage() {
+    echo "`basename $0` [-h] <query>"
+}
+
+ys() {
+        num=3
+        regex='^.*<a href="\(/watch[^"]*\)"[^>]*>\([^<]*\)</a>.*$'
+        output='\2 - http://youtube.com\1'
+
+        while getopts "hn:tu" OPT; do
+            case  $OPT in
+                n) num=$OPTARG;;
+                t) output='\2';;
+                u) output='http://youtube.com\1';;
+                h) usage long; exit 0;;
+                *) usage; exit 1;;
+            esac
+        done
+
+        shift $((OPTIND - 1))
+
+        query=$(echo $@ | tr ' ' '+')
+        url="https://www.youtube.com/results?search_query=${query}"
+
+        curl -s "$url" | sed -n "s,$regex,$output,p" | sed ${num}q
+}
+
+tag() {
+  echo -en "Let's tag this shit\n"
+  echo -en "What's the Artist?: "
+  read ARTIST_TAG
+  echo -en "\nNow, the Title?: "
+  read TITLE_TAG
+  echo -en "\nFinally, the Album?: "
+  read ALBUM_TAG
+  echo -en "\nArtist: $ARTIST_TAG"
+  echo -en "\nTitle: $TITLE_TAG"
+  echo -en "\nAlbum: $ALBUM_TAG"
+  echo -en "\nIs this ok? (y/n/quit)"
+  read yesno
+  case $yesno in
+    y) dotag;;
+    n) tag;;
+    quit) exit;;
+    *) exit ;;
+  esac
+}
+
+dotag() {
+  id3v2 -a "$ARTIST_TAG" "$TITLE.mp3"
+  id3v2 -t "$TITLE_TAG" "$TITLE.mp3"
+  id3v2 -A "$ALBUM_TAG" "$TITLE.mp3"
+}
+
+embed_cover() {
+ echo -e "Embedding cover.\n\n"
+ # ffmpeg -i "$TITLE.mp3" -i /tmp/ydlcover.jpg -map 0:a -q:a 4 -map 1:v -c:v copy -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (Front)" "$TITLE.mp3"
+ lame --ti /tmp/ydlcover.jpg "$TITLE.mp3"
+ rm /tmp/ydlcover.jpg
+ mv "$TITLE.mp3.mp3" "$TITLE.mp3"
+ echo -e "\n Embeded cover, have fun."
+}
+
+get_cover() {
+  echo -e "Downloading cover."
+  cd /tmp
+  wget -q "$THUMBNAIL" -O ydlcover.jpg
+  echo -e "\nCover downloaded.\n\n"
+}
+# don't process if no argument given
+test $# -eq 0 && usage && exit 1
+
+# you can either pass MULTIPLE search terms or a SINGLE url
+test $# -gt 1 && uri=$(ys -n1 -u $@) || uri=$1
+
+# give up if we got no uri
+if test -z "$uri"; then
+    echo "no result found"
+    exit 1
+fi
+
+# change to target dir if it exists
+# test -d $MPD_DOWNLOAD_DIR && cd $MPD_DOWNLOAD_DIR
+
+# download and extract audio track
+TITLE="$(youtube-dl --get-title $uri)"
+THUMBNAIL="$(youtube-dl --get-thumbnail $uri)"
+
+get_cover
+test -d $MPD_DOWNLOAD_DIR && cd $MPD_DOWNLOAD_DIR
+echo -e "\nDownloading song."
+youtube-dl -q --audio-format mp3 -x -o '%(title)s.%(ext)s' "$uri"
+echo -e "\nSong downloaded."
+embed_cover
+tag
+
+# update mpd lib if running
+pgrep mpd >/dev/null 2>&1&& mpc -q update
+
+exit 0

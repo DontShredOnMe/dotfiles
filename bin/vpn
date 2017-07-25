@@ -1,0 +1,27 @@
+#!/bin/bash
+# 1st parameter is a .conf file which resides in /etc/openvpn
+# 2nd paramter is a wallpaper accociated with the vpn provider
+
+sudo pkill -9 openvpn
+sudo pkill openvpn
+sudo pkill pptp
+
+country="sweden"
+
+if [[ -n $1 ]]; then
+    country=$1
+fi
+
+
+$(
+    sleep 0.1
+    if [[ -n $2 ]]; then
+        $HOME/bin/wal -i "$2"
+    fi
+) &
+
+if [[ "$country" == "sweden" ]]; then
+    notify-send "VPN Connected to: Sweden"
+fi
+
+sudo openvpn --config /etc/openvpn/$1.conf
